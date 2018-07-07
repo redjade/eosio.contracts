@@ -80,6 +80,22 @@ namespace eosiosystem {
       return from;
    }
 
+   void exchange_state::depreciate( symbol_type c, double rate ) {
+      auto base_symbol  = base.balance.symbol;
+      auto quote_symbol = quote.balance.symbol;
 
+      if (c == base_symbol) {
+         connector& conn = base;
+      } else (c == quote_symbol) {
+         connector& conn = quote;
+      } else {
+         eosio_assert( false, "invalid asset in rammarket");
+      }
+
+      real_type C(conn.balance.amount);
+      real_type dC = C * rate;
+      int64_t out = int64_t(dC);
+      conn.balance.amount -= out;
+   }
 
 } /// namespace eosiosystem

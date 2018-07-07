@@ -187,6 +187,11 @@ namespace eosiosystem {
           */
          void sellram( account_name receiver, int64_t bytes );
 
+        /**
+         * Burn EOS in eosio.ram and remove associated connector balance.
+         */
+         void burnram();
+
          /**
           *  This action is called after the delegation-period to claim all pending
           *  unstaked tokens belonging to owner
