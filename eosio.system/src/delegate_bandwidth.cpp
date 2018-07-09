@@ -225,10 +225,10 @@ namespace eosiosystem {
    void system_contract::burnram() {
       require_auth( _self );
 
+      asset tokens_burnt;
       auto itr = _rammarket.find(S(4,RAMCORE));
       _rammarket.modify( itr, 0, [&]( auto& es ) {
-         // TODO : change depreciate to return asset with amount in order to coordinate eosio.token supply subtraction.
-         es.depreciate(CORE_SYMBOL, ram_depreciation_rate, core_initial_supply);
+         tokens_burnt = es.depreciate(CORE_SYMBOL, ram_depreciation_rate, core_initial_supply);
       });
 
       // TODO : remove ram_depreciation_rate of eosio.ram via inline action to eosio.token

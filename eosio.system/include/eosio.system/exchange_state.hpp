@@ -32,7 +32,7 @@ namespace eosiosystem {
       asset convert_from_exchange( connector& c, asset in );
       asset convert( asset from, symbol_type to );
 
-      void depreciate( symbol_type c, double rate, double init_supply );
+      asset depreciate( symbol_type c, double rate, double init_supply );
 
       EOSLIB_SERIALIZE( exchange_state, (supply)(base)(quote) )
    };

@@ -80,7 +80,7 @@ namespace eosiosystem {
       return from;
    }
 
-   void exchange_state::depreciate( symbol_type c, double rate, double init_supply ) {
+   asset exchange_state::depreciate( symbol_type c, double rate, double init_supply ) {
       auto base_symbol  = base.balance.symbol;
       auto quote_symbol = quote.balance.symbol;
 
@@ -101,6 +101,8 @@ namespace eosiosystem {
       real_type dC = C * rate;
       int64_t out = int64_t(dC);
       conn.balance.amount -= out;
+
+      return asset( out, conn.balance.symbol );
    }
 
 } /// namespace eosiosystem
