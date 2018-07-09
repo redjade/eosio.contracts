@@ -222,6 +222,10 @@ namespace eosiosystem {
     *  4. how to burn tokens in eosio.ram : a
     *    a. burn tokens of eosio.ram and subtract equal amount from stat for adjusting supply of EOS.
     */
+   // TODO : add unittest
+   // TODO : contemplate whether burnram is suitable as an action or ...
+   // TODO : implement periodic execution of burnram inside of some action(onblock??) or some appropriate point...
+   // TODO : check if corner case exists when removed amount of bancor is bigger than balance of eosio.ram
    void system_contract::burnram() {
       require_auth( _self );
 
@@ -231,7 +235,11 @@ namespace eosiosystem {
          tokens_burnt = es.depreciate(CORE_SYMBOL, ram_depreciation_rate, core_initial_supply);
       });
 
-      // TODO : remove ram_depreciation_rate of eosio.ram via inline action to eosio.token
+      if (tokens_burnt > asset(0)) {
+         INLINE_ACTION_SENDER(eosio::token, burn)( N(eosio.token), {N(eosio.token),N(active)},
+                                                   { N(eosio.ram), asset(tokens_burnt), std::string("burn ram") }
+         );
+      }
       
    }
 
