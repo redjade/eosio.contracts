@@ -84,6 +84,36 @@ void token::transfer( account_name from,
     add_balance( to, quantity, from );
 }
 
+// TODO : add unittest
+// TODO : check more asserts is necessary
+// TODO : check whether eosio permissions is required or it is okay to burn by account owner
+// TODO : Add Ricardian contract
+void token::burn( account_name from, asset quantity, string memo ) {
+    require_auth( _self );
+
+    eosio_assert( is_account( from ), "from account does not exist");
+    eosio_assert( quantity.is_valid(), "invalid quantity" );
+    eosio_assert( quantity.amount > 0, "must burn positive quantity" );
+    eosio_assert( memo.size() <= 256, "memo has more than 256 bytes" );
+
+    auto sym = quantity.symbol.name();
+    eosio_assert( sym.is_valid(), "invalid symbol name" );
+
+    stats statstable( _self, sym );
+    const auto& st = statstable.get( sym );
+    eosio_assert( st != statstable.end(), "token with symbol does not exist, create token before burn" );
+    eosio_assert( quantity.symbol == st.supply.symbol, "symbol precision mismatch" );
+
+    // burn quantity of symbol from 'from'
+    sub_balance( from, quantity );
+
+    // burn quantity of symbol from token stat
+    eosio_assert( quantity.amount <= st.supply.amount, "quantity exceeds available supply");
+    statstable.modify( st, 0, [&]( auto& s ) {
+       s.supply -= quantity;
+    });
+}
+
 void token::sub_balance( account_name owner, asset value ) {
    accounts from_acnts( _self, owner );
 
@@ -117,4 +147,4 @@ void token::add_balance( account_name owner, asset value, account_name ram_payer
 
 } /// namespace eosio
 
-EOSIO_ABI( eosio::token, (create)(issue)(transfer) )
+EOSIO_ABI( eosio::token, (create)(issue)(transfer)(burn) )
