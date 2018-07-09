@@ -32,6 +32,8 @@ namespace eosiosystem {
    static constexpr time refund_expiration_time = 3600;
 
    const double ram_depreciation_rate = 0.1;
+   const double core_initial_supply = 1'000'000'000 / 1000; // XXX actually not exact value of mainnet
+   // TODO : check the amount is asis or *1000.
 
    struct user_resources {
       account_name  owner;
@@ -206,24 +208,29 @@ namespace eosiosystem {
     * Burn EOS in eosio.ram and remove associated connector balance.
     * 
     * We should choose variables/approaches below:
-    *  0. The base value of EOS connector balance? : a
-    *   a. current whole
-    *   b. (CUR - (initial ystem_token_supply / 1000) )
-    *  1. How much percent of base value of EOS connector balance? : 10% (ram_depreciation_rate)
-    *  2. Frequency : once per month (every 21st day)
-    *  3. epoch timestamp : 20180721 12:30 UTC+09
+    *  0. The base value of EOS connector balance? : b
+    *    a. current whole : can't return to initial supply of EOS (system_token_supply / 1000)
+    *    b. (CUR - (initial ystem_token_supply / 1000) )
+    *      i. connector bal of EOS is always 10B/1000 bigger than eosio.ram
+    *  1. How much percent of base value of EOS connector balance? : a
+    *    a. 10% (ram_depreciation_rate) : initial idea, maybe on current whole EOS balance of bancor. expected to 11% decrease in RAM price.
+    *    b. when using "b" option of base value of EOS connector balance, we need more aggressive depreciation rate?
+    *  2. Frequency : a
+    *    a. once per month (every 21st day)
+    *  3. epoch timestamp : a
+    *    a. 20180721 12:30 UTC+09
     */
    void system_contract::burnram() {
       require_auth( _self );
 
       auto itr = _rammarket.find(S(4,RAMCORE));
       _rammarket.modify( itr, 0, [&]( auto& es ) {
-         es.depreciate(CORE_SYMBOL, ram_depreciation_rate);
+         // TODO : change depreciate to return asset with amount in order to coordinate eosio.token supply subtraction.
+         es.depreciate(CORE_SYMBOL, ram_depreciation_rate, core_initial_supply);
       });
 
-      // TODO : check base value of EOS connector : maybe b. connector bal of EOS is always 10B/1000 bigger than eosio.ram
-      // TODO : remove ram_depreciation_rate of eosio.ram via inline action to eosio.token
       // TODO : add action burn( account_name from, asset quantity, string  memo )
+      // TODO : remove ram_depreciation_rate of eosio.ram via inline action to eosio.token
       // TODO : what about EOS supply in eosio.token? remove ram_depreciation_rate of eosio.ram because it is burnt? maybe.
       // TODO : burn_token( symbol_name sym, amount burn ) in eosio.token to adjust supply of a token. maybe only in private method.
       

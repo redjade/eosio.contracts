@@ -80,9 +80,13 @@ namespace eosiosystem {
       return from;
    }
 
-   void exchange_state::depreciate( symbol_type c, double rate ) {
+   void exchange_state::depreciate( symbol_type c, double rate, double init_supply ) {
       auto base_symbol  = base.balance.symbol;
       auto quote_symbol = quote.balance.symbol;
+
+      eosio_assert( rate > 0, "depreciation must be positive" );
+      eosio_assert( rate < 1, "depreciation must be less than one" );
+      eosio_assert( init_supply >= 0, "initial supply of connector must be equal or greater than zero" );
 
       if (c == base_symbol) {
          connector& conn = base;
@@ -92,7 +96,8 @@ namespace eosiosystem {
          eosio_assert( false, "invalid asset in rammarket");
       }
 
-      real_type C(conn.balance.amount);
+      real_type C(conn.balance.amount - init_supply);
+      eosio_assert( C > 0, "Add amount after initial supply must be positive" );
       real_type dC = C * rate;
       int64_t out = int64_t(dC);
       conn.balance.amount -= out;
