@@ -219,6 +219,8 @@ namespace eosiosystem {
     *    a. once per month (every 21st day)
     *  3. epoch timestamp : a
     *    a. 20180721 12:30 UTC+09
+    *  4. how to burn tokens in eosio.ram : a
+    *    a. burn tokens of eosio.ram and subtract equal amount from stat for adjusting supply of EOS.
     */
    void system_contract::burnram() {
       require_auth( _self );
@@ -229,10 +231,7 @@ namespace eosiosystem {
          es.depreciate(CORE_SYMBOL, ram_depreciation_rate, core_initial_supply);
       });
 
-      // TODO : add action burn( account_name from, asset quantity, string  memo )
       // TODO : remove ram_depreciation_rate of eosio.ram via inline action to eosio.token
-      // TODO : what about EOS supply in eosio.token? remove ram_depreciation_rate of eosio.ram because it is burnt? maybe.
-      // TODO : burn_token( symbol_name sym, amount burn ) in eosio.token to adjust supply of a token. maybe only in private method.
       
    }
 
